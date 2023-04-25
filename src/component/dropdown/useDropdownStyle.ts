@@ -60,6 +60,9 @@ const useDropdownStyle = createUseStyles({
     },
     "option-selected": {backgroundColor: "rgba(6,125,30,0.24)"},
     "option-highlighted": {backgroundColor: "rgba(6,125,30,0.73)", color: "white"},
+    "tick" : {
+        float : 'right'
+    },
     "option-badge": {
         display: "flex",
         alignItems: "center",
