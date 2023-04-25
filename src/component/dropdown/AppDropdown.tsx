@@ -97,6 +97,7 @@ export default function AppDropdown({multiple, value, onChange, options, placeho
                         } ${index === highlightedIndex ? `${classes["option-highlighted"]}` : ""}`}
                     >
                         {option.label}
+                        {isOptionSelected(option) && <span className={classes.tick}>&#x2713;</span>}
                     </li>
                 ))}
             </ul>
