@@ -17,5 +17,17 @@ type SingleDropdownProps = {
 
 export type DropdownProps = {
     options: DropdownOption[],
+    loading: boolean,
     placeholder: string
 } & (SingleDropdownProps | MultipleDropdownProps)
+
+export type OptionsProps = {
+    value?: DropdownOption[] | DropdownOption
+    multiple?: boolean
+    options: DropdownOption[],
+    loading: boolean,
+    isOpen: boolean,
+    highlightedIndex: number,
+    onItem: (item: DropdownOption) => void
+    onItemMouseEnter: (index: number) => void
+}

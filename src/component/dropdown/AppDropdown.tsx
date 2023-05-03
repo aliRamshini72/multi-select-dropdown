@@ -1,11 +1,12 @@
-import useDropdownStyle from "./useDropdownStyle";
 import {DropdownOption, DropdownProps} from "../../model/dropdown/dropdownModels";
 import useDropdown from "../../hook/useDropdown";
 import {useCallback} from "react";
+import Options from "./Options";
+import SelectedItems from "./SelectedItems";
+import {DropdownContainer, DropdownInput, ClearBtn, Divider, Caret} from './styles'
 
 
-export default function AppDropdown({multiple, value, onChange, options, placeholder}: DropdownProps) {
-    const classes = useDropdownStyle()
+export default function AppDropdown({loading, multiple, value, onChange, options, placeholder}: DropdownProps) {
 
     const clearOptions = useCallback(() => {
         multiple ? onChange([]) : onChange(undefined)
@@ -21,86 +22,78 @@ export default function AppDropdown({multiple, value, onChange, options, placeho
         } else {
             if (option !== value) onChange(option)
         }
+        setSearchQuery("")
     }, [multiple, onChange, value])
 
-    const isOptionSelected = useCallback((option: DropdownOption) => {
-        return multiple ? value?.includes(option) : option === value
-    }, [multiple, value])
+    const onItem = (option: DropdownOption) => {
+        if (option)
+            selectOption(option)
+        setIsOpen(false)
+    }
+
+    const onItemMouseEnter = useCallback((index: number) => {
+        setHighlightedIndex(index)
+    }, [])
+
+    const onSelectedItem = (item: DropdownOption) => selectOption(item)
+
+    const onChangeInput = (event: any) => {
+        setIsOpen(true)
+        setSearchQuery(event.target.value)
+    }
+    const onBlurContainer = (event: any) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+            setIsOpen(false)
+        }
+    }
 
     const {
+        data,
         isOpen,
         setIsOpen,
         highlightedIndex,
         setHighlightedIndex,
         containerRef,
-    } = useDropdown(options, selectOption)
-
-
-    const renderValue = () => {
-        if (multiple) {
-            if (value.length > 0) return value.map(v => (
-                <button
-                    key={v.value}
-                    onClick={e => {
-                        e.stopPropagation()
-                        selectOption(v)
-                    }}
-                    className={classes["option-badge"]}
-                >
-                    {v.label}
-                    <span>&times;</span>
-                </button>
-            ))
-            else return placeholder
-        } else {
-            if (value) return value.label
-            else return placeholder
-        }
-    }
-
+        searchQuery, setSearchQuery
+    } = useDropdown(loading, options, selectOption)
 
     return (
-        <div
-            ref={containerRef}
-            onBlur={() => setIsOpen(false)}
-            onClick={() => setIsOpen(prev => !prev)}
+        <DropdownContainer
             tabIndex={0}
-            className={classes.container}
-        >
-              <span className={classes.value}>
-                  {renderValue()}
-              </span>
-            <button
-                onClick={e => {
-                    e.stopPropagation()
-                    clearOptions()
-                }}
-                className={classes["clear-btn"]}
-            >
-                &times;
-            </button>
-            <div className={classes.divider}></div>
-            <div className={classes.caret}></div>
-            <ul className={`${classes.options} ${isOpen ? `${classes["options-show"]}` : ""}`}>
-                {options.map((option, index) => (
-                    <li
-                        onClick={e => {
-                            e.stopPropagation()
-                            if (option)
-                                selectOption(option)
-                            setIsOpen(false)
-                        }}
-                        onMouseEnter={() => setHighlightedIndex(index)}
-                        key={option.value}
-                        className={`${classes.option} ${
-                            isOptionSelected(option) ? `${classes["option-selected"]}` : ""
-                        } ${index === highlightedIndex ? `${classes["option-highlighted"]}` : ""}`}
-                    >
-                        {option.label}
-                        {isOptionSelected(option) && <span className={classes.tick}>&#x2713;</span>}
-                    </li>
-                ))}
-            </ul>
-        </div>
+            ref={containerRef}
+            onBlur={onBlurContainer}
+            onClick={() => {
+                setIsOpen(prev => !prev)
+            }}>
+            <SelectedItems
+                value={value}
+                multiple={multiple}
+                onItem={onSelectedItem}/>
+            <DropdownInput
+                value={searchQuery}
+                onChange={onChangeInput} placeholder={placeholder}
+                id={'dropdown-input'}/>
+            <ClearBtn onClick={(event) => {
+                event.stopPropagation()
+                clearOptions()
+            }}/>
+            <Divider/>
+            <Caret/>
+            <Options
+                isOpen={isOpen}
+                loading={loading}
+                options={data}
+                multiple={multiple}
+                value={value}
+                onItem={onItem}
+                highlightedIndex={highlightedIndex}
+                onItemMouseEnter={onItemMouseEnter}
+            />
+        </DropdownContainer>
     )
 }
+
+
+
+
+
